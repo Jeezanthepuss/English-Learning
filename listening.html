@@ -1,0 +1,92 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listening Skill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-header {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <header class="gradient-header text-white text-center py-12">
+    <h1 class="text-4xl font-extrabold">Listening Skill</h1>
+    <a href="index.html" class="text-sm underline">Back to Home</a>
+  </header>
+  <main class="container mx-auto mt-10 p-6">
+    <section class="bg-white p-8 rounded-xl shadow-lg">
+      <h2 class="text-2xl font-semibold text-blue-700">Listening Practice</h2>
+      <img src="https://images.unsplash.com/photo-1618359057154-bec6b90885b4" alt="Earphones" class="w-full h-48 object-cover rounded-lg mt-4">
+      <p class="mt-4 text-gray-700 leading-relaxed">
+        Listen to this intermediate-level podcast episode from BBC Learning English about "The Future of Work." It discusses how technology impacts jobs. Click here to listen:
+        <a href="https://www.bbc.co.uk/learningenglish/english/features/6-minute-english/ep-200723" class="text-blue-600 font-bold text-lg underline" target="_blank">🎧 Podcast Episode 🎧</a>
+      </p>
+      <h3 class="mt-6 text-xl font-semibold text-blue-700">Listening Questions</h3>
+      <ol class="list-decimal ml-6 mt-2 text-gray-600">
+        <li>What is the main topic of the podcast?</li>
+        <li>Name two ways technology affects jobs, as mentioned.</li>
+        <li>What new vocabulary word did you learn?</li>
+        <li>What is one opinion expressed in the podcast?</li>
+      </ol>
+      <div class="mt-6">
+        <textarea id="answers" class="w-full p-3 border rounded-lg" rows="6" placeholder="Write your answers here..."></textarea>
+        <button onclick="checkAnswers()" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">Check Answers</button>
+        <p id="result" class="mt-3 text-green-600 hidden">Sample Answers: 1. Future of work. 2. Automation and remote work. 3. (Depends on your choice). 4. (Varies, e.g., technology creates new opportunities).</p>
+      </div>
+      <h3 class="mt-6 text-xl font-semibold text-blue-700">Extra Activity</h3>
+      <p class="mt-2 text-gray-600">Summarize the podcast in 3-4 sentences, focusing on the key points about technology’s impact on work.</p>
+      <textarea id="summary" class="w-full p-3 border rounded-lg mt-2" rows="4" placeholder="Write your summary here..."></textarea>
+    </section>
+  </main>
+  <footer class="bg-gray-900 text-white text-center py-6 mt-12">
+    <p>University Project - English Learning Hub</p>
+  </footer>
+  <script>
+    function checkAnswers() {
+      document.getElementById('result').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

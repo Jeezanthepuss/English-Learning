@@ -1,0 +1,103 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading Skill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-header {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <header class="gradient-header text-white text-center py-12">
+    <h1 class="text-4xl font-extrabold">Reading Skill</h1>
+    <a href="index.html" class="text-sm underline">Back to Home</a>
+  </header>
+  <main class="container mx-auto mt-10 p-6 flex flex-col md:flex-row gap-6">
+    <section class="bg-white p-8 rounded-xl shadow-lg md:w-2/3">
+      <h2 class="text-2xl font-semibold text-blue-700">Reading Passage</h2>
+      <img src="https://images.unsplash.com/photo-1511629091441-ee46146481b6" alt="Culture" class="w-full h-48 object-cover rounded-lg mt-4">
+      <p class="mt-4 text-gray-700 leading-relaxed">
+        Global festivals are a **vibrant** showcase of human culture, each offering a unique lens into societal values. The Rio Carnival in Brazil, renowned for its **exuberant** samba parades and **lavish** costumes, draws millions annually, blending music, dance, and community spirit. In contrast, Diwali, the Hindu festival of lights celebrated across India, involves lighting **myriad** oil lamps to signify the triumph of good over evil, accompanied by fireworks and shared feasts. Germany’s Oktoberfest, a **quintessential** Bavarian tradition, features hearty meals, folk music, and vast quantities of beer, fostering a sense of regional pride. However, the **encroachment** of globalization has introduced commercial elements to these events, sometimes diluting their cultural **authenticity**. For instance, corporate sponsorships at festivals like Carnival can overshadow traditional practices, raising debates about whether modernization erodes their original meaning or enhances their global appeal. These celebrations, while diverse, share a common thread of uniting people, yet their evolution prompts reflection on preserving heritage in a rapidly changing world.
+      </p>
+      <h3 class="mt-6 text-xl font-semibold text-blue-700">Comprehension Questions</h3>
+      <ol class="list-decimal ml-6 mt-2 text-gray-600">
+        <li>What is the main purpose of the Rio Carnival?</li>
+        <li>How does Diwali symbolize its core theme?</li>
+        <li>What aspect of Oktoberfest reflects Bavarian culture?</li>
+        <li>What concern is raised about global festivals?</li>
+      </ol>
+      <div class="mt-6">
+        <textarea id="answers" class="w-full p-3 border rounded-lg" rows="6" placeholder="Write your answers here..."></textarea>
+        <button onclick="checkAnswers()" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">Check Answers</button>
+        <p id="result" class="mt-3 text-green-600 hidden">Sample Answers: 1. Samba parades and celebration. 2. Victory of good over evil with lamps and fireworks. 3. Beer and folk music. 4. Loss of authenticity due to commercialization.</p>
+      </div>
+      <h3 class="mt-6 text-xl font-semibold text-blue-700">Vocabulary Activity</h3>
+      <p class="mt-2 text-gray-600">Use each bolded word in a new sentence to show you understand its meaning.</p>
+      <textarea id="vocab" class="w-full p-3 border rounded-lg mt-2" rows="4" placeholder="Write your sentences here..."></textarea>
+    </section>
+    <aside class="bg-gray-100 p-6 rounded-xl shadow-lg md:w-1/3">
+      <h3 class="text-xl font-semibold text-blue-700">Key Vocabulary</h3>
+      <ul class="list-disc ml-6 mt-2 text-gray-600">
+        <li><strong>Vibrant</strong>: Full of energy and enthusiasm.</li>
+        <li><strong>Exuberant</strong>: Joyfully unrestrained and enthusiastic.</li>
+        <li><strong>Lavish</strong>: Extravagantly rich or elaborate.</li>
+        <li><strong>Myriad</strong>: A countless or extremely large number.</li>
+        <li><strong>Quintessential</strong>: Representing the perfect example of something.</li>
+        <li><strong>Encroachment</strong>: Gradual intrusion or takeover.</li>
+        <li><strong>Authenticity</strong>: The quality of being genuine or real.</li>
+      </ul>
+    </aside>
+  </main>
+  <footer class="bg-gray-900 text-white text-center py-6 mt-12">
+    <p>University Project - English Learning Hub</p>
+  </footer>
+  <script>
+    function checkAnswers() {
+      document.getElementById('result').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
